@@ -1,0 +1,13 @@
+{
+    "header": {
+      "hotline": "Hotline",
+      "wishlist": "Wishlist",
+      "account": "Account",
+      "login": "Login",
+      "cart": "Cart"
+    },
+    "common": {
+      "welcome": "Welcome!",
+      "description": "This is our website."
+    }
+  }

@@ -1,0 +1,13 @@
+{
+    "header": {
+      "hotline": "Hotline",
+      "wishlist": "Danh sách yêu thích",
+      "account": "Tài khoản",
+      "login": "Đăng nhập",
+      "cart": "Giỏ hàng"
+    },
+    "common": {
+      "welcome": "Chào mừng bạn!",
+      "description": "Đây là trang web của chúng tôi."
+    }
+  }
