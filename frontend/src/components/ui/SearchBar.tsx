@@ -6,25 +6,14 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-// Hàm chuẩn hóa chuỗi tiếng Việt thành không dấu
-const normalizeVietnamese = (str: string): string => {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toLowerCase()
-    .trim();
-};
-
+// Giao diện Product đồng bộ với ProductDetail.tsx
 interface Product {
   id: string;
   title: string;
   brand: string;
-  originalPrice: string;
-  discountedPrice?: string;
+  originalPrice: string; // Hoặc number, tùy thuộc vào API
+  discountedPrice?: string; // Hoặc number
   image: string;
-  href?: string;
 }
 
 const SearchBar = () => {
@@ -34,8 +23,18 @@ const SearchBar = () => {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [isFeaturedLoading, setIsFeaturedLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [featuredError, setFeaturedError] = useState<string | null>(null);
-  const [isFocused, setIsFocused] = useState(false); // Trạng thái mới cho focus
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Hàm chuẩn hóa chuỗi tiếng Việt
+  const normalizeVietnamese = (str: string): string => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase()
+      .trim();
+  };
 
   // Fetch sản phẩm tìm kiếm
   const fetchSearchResults = useCallback(async (term: string) => {
@@ -47,11 +46,15 @@ const SearchBar = () => {
     setIsSearchLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/products/search?search=${encodeURIComponent(term)}`
+        `http://localhost:5000/api/products/search?search=${encodeURIComponent(term)}`,
+        { cache: "no-store" }
       );
       if (!res.ok) throw new Error("Không thể tìm kiếm sản phẩm");
-      const data = await res.json();
-      setSearchResults(data);
+      const data: Product[] = await res.json();
+      // Kiểm tra dữ liệu trả về
+      setSearchResults(
+        data.filter((product) => product.id && typeof product.id === "string")
+      );
       setError(null);
     } catch (error) {
       console.error("Lỗi tìm kiếm sản phẩm:", error);
@@ -65,18 +68,21 @@ const SearchBar = () => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const res = await fetch("http://localhost:5000/api/products", {
+          cache: "no-store",
+        });
         if (!res.ok) throw new Error("Không thể tải sản phẩm nổi bật");
-        const data = await res.json();
+        const data: Product[] = await res.json();
         const royalCaninProducts = data
-          .filter((product: Product) => 
-            product.brand && normalizeVietnamese(product.brand) === "royal canin"
+          .filter(
+            (product) =>
+              product.brand && normalizeVietnamese(product.brand) === "royal canin"
           )
           .slice(0, 3);
         setFeaturedProducts(royalCaninProducts);
-        setFeaturedError(null);
+        setError(null);
       } catch (err) {
-        setFeaturedError("Lỗi khi tải sản phẩm: " + (err as Error).message);
+        setError("Lỗi khi tải sản phẩm: " + (err as Error).message);
       } finally {
         setIsFeaturedLoading(false);
       }
@@ -84,6 +90,7 @@ const SearchBar = () => {
     fetchFeaturedProducts();
   }, []);
 
+  // Debounce tìm kiếm
   useEffect(() => {
     const debounce = setTimeout(() => {
       fetchSearchResults(searchTerm);
@@ -91,6 +98,7 @@ const SearchBar = () => {
     return () => clearTimeout(debounce);
   }, [searchTerm, fetchSearchResults]);
 
+  // Chuẩn hóa đường dẫn hình ảnh
   const normalizeImagePath = (path: string | undefined): string => {
     if (!path) return "/images/default-product.jpg";
     if (path.startsWith("http://") || path.startsWith("https://")) return path;
@@ -98,10 +106,7 @@ const SearchBar = () => {
     return `/images/${path}`;
   };
 
-  const normalizeHref = (href: string | undefined, id: string): string => {
-    return href && typeof href === "string" ? href : `/products/${id}`;
-  };
-
+  // Highlight từ khóa tìm kiếm
   const highlightSearchTerm = (text: string, term: string): JSX.Element => {
     if (!term) return <span>{text}</span>;
     const normalizedTerm = normalizeVietnamese(term);
@@ -121,6 +126,12 @@ const SearchBar = () => {
     );
   };
 
+  // Xử lý nhấp vào sản phẩm
+  const handleProductClick = () => {
+    setSearchTerm(""); // Xóa nội dung tìm kiếm
+    setIsFocused(false); // Ẩn danh sách kết quả
+  };
+
   const popularSearches = [
     "royal canin",
     "Gel Dinh Dưỡng",
@@ -137,9 +148,10 @@ const SearchBar = () => {
           placeholder="Tìm kiếm sản phẩm..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onFocus={() => setIsFocused(true)} // Đặt trạng thái focus thành true
+          onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setTimeout(() => setIsFocused(false), 200); // Delay để cho phép nhấp vào kết quả
+            // Delay để cho phép nhấp vào kết quả trước khi ẩn
+            setTimeout(() => setIsFocused(false), 200);
           }}
         />
         <Button className="absolute bg-white right-2 top-1/2 -translate-y-1/2 shadow-none">
@@ -153,7 +165,7 @@ const SearchBar = () => {
         </Button>
       </div>
       {(isFocused || searchTerm) && (
-        <div className="absolute top-full left-0 right-0 bg-white shadow-lg rounded-md mt-2 z-50">
+        <div className="absolute top-full left-0 right-0 bg-white shadow-lg rounded-md mt-2 z-50 max-h-[500px] overflow-y-auto">
           {searchTerm ? (
             isSearchLoading ? (
               <div className="p-4 text-center text-gray-500">Đang tìm kiếm...</div>
@@ -163,9 +175,9 @@ const SearchBar = () => {
               searchResults.map((product) => (
                 <Link
                   key={product.id}
-                  href={normalizeHref(product.href, product.id)}
+                  href={`/products/${product.id}`}
                   className="flex items-center p-4 hover:bg-gray-100"
-                  onClick={() => setSearchTerm("")}
+                  onClick={handleProductClick}
                 >
                   <Image
                     src={normalizeImagePath(product.image)}
@@ -181,7 +193,7 @@ const SearchBar = () => {
                     <p className="font-semibold">{highlightSearchTerm(product.title, searchTerm)}</p>
                     <p className="text-sm text-gray-500">{product.brand}</p>
                     <p className="text-sm font-bold text-red-500">
-                      {product.discountedPrice || product.originalPrice}
+                      {product.discountedPrice || product.originalPrice}₫
                     </p>
                   </div>
                 </Link>
@@ -193,13 +205,16 @@ const SearchBar = () => {
             )
           ) : (
             <>
-              <div className="p-2">
+              <div className="p-4">
                 <p className="text-sm font-semibold mb-2">Tìm kiếm phổ biến</p>
                 <div className="grid grid-cols-2 gap-2">
                   {popularSearches.map((search, index) => (
                     <button
                       key={index}
-                      onClick={() => setSearchTerm(search)}
+                      onClick={() => {
+                        setSearchTerm(search);
+                        setIsFocused(true);
+                      }}
                       className="text-left text-blue-500 hover:underline p-1"
                     >
                       {search}
@@ -207,20 +222,20 @@ const SearchBar = () => {
                   ))}
                 </div>
               </div>
-              <div className="p-2">
+              <div className="p-4">
                 <p className="text-sm font-semibold mb-2">Sản phẩm nổi bật</p>
                 {isFeaturedLoading ? (
                   <div className="text-center text-gray-500 p-4">Đang tải...</div>
-                ) : featuredError ? (
-                  <div className="text-center text-red-500 p-4">{featuredError}</div>
+                ) : error ? (
+                  <div className="text-center text-red-500 p-4">{error}</div>
                 ) : featuredProducts.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2">
                     {featuredProducts.map((product) => (
                       <Link
                         key={product.id}
-                        href={normalizeHref(product.href, product.id)}
+                        href={`/products/${product.id}`}
                         className="border p-2 rounded-lg shadow hover:shadow-lg transition"
-                        onClick={() => setSearchTerm("")}
+                        onClick={handleProductClick}
                       >
                         <Image
                           src={normalizeImagePath(product.image)}
@@ -235,7 +250,7 @@ const SearchBar = () => {
                         <h3 className="text-sm font-semibold mt-1 truncate">{product.title}</h3>
                         <p className="text-xs text-gray-500">{product.brand}</p>
                         <p className="text-xs font-bold text-red-500">
-                          {product.discountedPrice || product.originalPrice}
+                          {product.discountedPrice || product.originalPrice}₫
                         </p>
                       </Link>
                     ))}

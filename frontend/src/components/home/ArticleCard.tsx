@@ -39,7 +39,7 @@ const ArticleCard = ({ article }: { article: Article }) => {
       </div>
 
       <div className="p-4 text-left border-x border-b h-60 border-gray-300">
-        <h3 className="text-xl font-semibold mb-2">
+        <h3 className="text-xl font-semibold mb-2 dark:text-black">
           <Link href={href}>{article.title}</Link>
         </h3>
         <div className="mb-4 text-sm text-gray-600">{article.name}</div>

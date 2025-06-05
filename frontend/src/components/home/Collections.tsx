@@ -74,7 +74,7 @@ const Collections = () => {
             </div>
             <Link
               href={safeHref}
-              className="text-center mt-2 text-black text-lg font-medium hover:text-[#234bbb] hover:underline hover:underline-offset-2"
+              className="text-center mt-2 dark:text-white text-lg font-medium hover:text-[#234bbb] hover:underline hover:underline-offset-2"
             >
               {item.title}
             </Link>

@@ -30,6 +30,17 @@ export interface CartItem {
   brand: string;
 }
 
+// Định nghĩa kiểu dữ liệu cho Order
+interface Order {
+  orderCode: string;
+  date: string;
+  totalPrice: number;
+  items: CartItem[];
+  address: string;
+  phone: string;
+  email: string;
+}
+
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
@@ -38,6 +49,7 @@ interface CartContextType {
   syncCart: () => Promise<void>;
   clearCart: () => void;
   placeOrder: (items: CartItem[], address: string, phone: string, email: string) => Promise<{ orderCode: string }>;
+  getOrderHistory: () => Promise<Order[]>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -78,14 +90,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             'Accept': 'application/json',
           },
         });
-        console.log('HTTP Status from /api/products:', res.status);
         if (!res.ok) {
           console.warn(`Không thể lấy dữ liệu từ /api/products, status: ${res.status}`);
-          return Array.from(itemMap.values()); // Bỏ qua nếu API thất bại
+          return Array.from(itemMap.values());
         }
         const contentType = res.headers.get('content-type');
         const text = await res.text();
-        console.log('Raw response from /api/products:', text);
         if (!contentType || !contentType.includes('application/json')) {
           console.warn('Phản hồi từ /api/products không phải JSON:', contentType);
           return Array.from(itemMap.values());
@@ -97,7 +107,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Không thể parse JSON từ /api/products:', text);
           return Array.from(itemMap.values());
         }
-        console.log('Phản hồi từ /api/products:', data);
         if (data.products) {
           data.products.forEach((product) => {
             const item = itemMap.get(product._id.toString());
@@ -118,17 +127,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const syncCart = useCallback(async () => {
-    console.log('Starting syncCart... User:', user);
-    if (!user) {
-      console.log('Người dùng chưa đăng nhập, sử dụng localStorage');
-      const storedItems = localStorage.getItem('cartItems');
+    if (!user || !user.email) {
+      const storedItems = localStorage.getItem(`cartItems_guest`);
       if (storedItems) {
         const parsedItems = JSON.parse(storedItems) as CartItem[];
         const mergedItems = await mergeCartItems(parsedItems);
-        console.log('Đồng bộ từ localStorage (sau merge):', mergedItems);
         setCartItems(mergedItems);
       } else {
-        console.log('Không có dữ liệu localStorage, đặt lại thành rỗng');
         setCartItems([]);
       }
       return;
@@ -142,14 +147,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'Accept': 'application/json',
         },
       });
-      console.log('HTTP Status from /api/order_products:', res.status);
       if (res.status === 401 || res.status === 404) {
-        console.log(`Không thể lấy giỏ hàng (status ${res.status}), sử dụng localStorage`);
-        const storedItems = localStorage.getItem('cartItems');
+        const storedItems = localStorage.getItem(`cartItems_${user.email}`);
         if (storedItems) {
           const parsedItems = JSON.parse(storedItems) as CartItem[];
           const mergedItems = await mergeCartItems(parsedItems);
-          console.log('Đồng bộ từ localStorage (sau merge):', mergedItems);
           setCartItems(mergedItems);
         } else {
           setCartItems([]);
@@ -157,19 +159,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       if (!res.ok) {
-        console.warn(`HTTP error! status: ${res.status}`);
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       const contentType = res.headers.get('content-type');
       const text = await res.text();
-      console.log('Raw response from /api/order_products:', text);
       if (!contentType || !contentType.includes('application/json')) {
-        console.warn('Phản hồi từ /api/order_products không phải JSON:', contentType);
-        const storedItems = localStorage.getItem('cartItems');
+        const storedItems = localStorage.getItem(`cartItems_${user.email}`);
         if (storedItems) {
           const parsedItems = JSON.parse(storedItems) as CartItem[];
           const mergedItems = await mergeCartItems(parsedItems);
-          console.log('Đồng bộ từ localStorage (sau merge):', mergedItems);
           setCartItems(mergedItems);
         } else {
           setCartItems([]);
@@ -181,18 +179,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data = JSON.parse(text);
       } catch {
         console.error('Không thể parse JSON từ /api/order_products:', text);
-        const storedItems = localStorage.getItem('cartItems');
+        const storedItems = localStorage.getItem(`cartItems_${user.email}`);
         if (storedItems) {
           const parsedItems = JSON.parse(storedItems) as CartItem[];
           const mergedItems = await mergeCartItems(parsedItems);
-          console.log('Đồng bộ từ localStorage (sau merge):', mergedItems);
           setCartItems(mergedItems);
         } else {
           setCartItems([]);
         }
         return;
       }
-      console.log('Phản hồi từ /api/order_products:', data);
       if (data && data.products) {
         const mergedItems = await mergeCartItems(data.products.map((p) => ({
           productId: p.id,
@@ -202,40 +198,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           image: '',
           brand: '',
         })));
-        console.log('Đồng bộ từ backend (sau merge):', mergedItems);
         setCartItems(mergedItems);
-        localStorage.setItem('cartItems', JSON.stringify(mergedItems));
+        localStorage.setItem(`cartItems_${user.email}`, JSON.stringify(mergedItems));
       } else {
-        console.log('Không tìm thấy giỏ hàng hợp lệ từ /api/order_products, thử localStorage');
-        const storedItems = localStorage.getItem('cartItems');
+        const storedItems = localStorage.getItem(`cartItems_${user.email}`);
         if (storedItems) {
           const parsedItems = JSON.parse(storedItems) as CartItem[];
           const mergedItems = await mergeCartItems(parsedItems);
-          console.log('Đồng bộ từ localStorage (sau merge):', mergedItems);
           setCartItems(mergedItems);
         } else {
-          console.log('Không có dữ liệu, đặt lại thành rỗng');
           setCartItems([]);
-          localStorage.removeItem('cartItems');
+          localStorage.removeItem(`cartItems_${user.email}`);
         }
       }
     } catch (error) {
       console.error('Lỗi khi đồng bộ giỏ hàng từ /api/order_products:', error);
-      const storedItems = localStorage.getItem('cartItems');
+      const storedItems = localStorage.getItem(`cartItems_${user.email}`);
       if (storedItems) {
         const parsedItems = JSON.parse(storedItems) as CartItem[];
         const mergedItems = await mergeCartItems(parsedItems);
-        console.log('Fallback đến localStorage (sau merge):', mergedItems);
         setCartItems(mergedItems);
       } else {
-        console.log('Không có dữ liệu fallback, đặt lại thành rỗng');
         setCartItems([]);
       }
     }
   }, [user]);
 
   const addToCart = useCallback((item: CartItem) => {
-    console.log('Dữ liệu đầu vào addToCart:', item);
     setCartItems((prev) => {
       const existingItem = prev.find((i) => i.productId === item.productId);
       let newItems: CartItem[];
@@ -255,9 +244,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
         ];
       }
-      console.log('Giỏ hàng sau khi thêm:', newItems);
-      localStorage.setItem('cartItems', JSON.stringify(newItems));
-      if (user) {
+      localStorage.setItem(`cartItems_${user?.email ?? 'guest'}`, JSON.stringify(newItems));
+      if (user && user.email) {
         fetch('/api/order_products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -265,7 +253,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           body: JSON.stringify({ products: newItems }),
         })
           .then((res) => res.json())
-          .then((data) => console.log('Phản hồi từ POST /api/order_products:', data))
           .catch((error) => console.error('Không thể lưu giỏ hàng:', error));
       }
       return newItems;
@@ -277,8 +264,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const newItems = prev.map((item) =>
         item.productId === productId ? { ...item, quantity: Math.max(1, quantity) } : item
       );
-      localStorage.setItem('cartItems', JSON.stringify(newItems));
-      if (user) {
+      localStorage.setItem(`cartItems_${user?.email ?? 'guest'}`, JSON.stringify(newItems));
+      if (user && user.email) {
         fetch('/api/order_products', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -293,8 +280,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeItem = useCallback((productId: string) => {
     setCartItems((prev) => {
       const newItems = prev.filter((item) => item.productId !== productId);
-      localStorage.setItem('cartItems', JSON.stringify(newItems));
-      if (user) {
+      localStorage.setItem(`cartItems_${user?.email ?? 'guest'}`, JSON.stringify(newItems));
+      if (user && user.email) {
         fetch(`/api/order_products/${productId}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
@@ -307,11 +294,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = useCallback(() => {
     setCartItems([]);
-    localStorage.removeItem('cartItems');
-  }, []);
+    localStorage.removeItem(`cartItems_${user?.email ?? 'guest'}`);
+  }, [user]);
 
   const placeOrder = useCallback(async (items: CartItem[], address: string, phone: string, email: string) => {
-    if (!user) {
+    if (!user || !user.email) {
       throw new Error('Vui lòng đăng nhập để đặt hàng');
     }
     if (!items.length || !address || !phone || !email) {
@@ -325,26 +312,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
+          userId: user.email,
           items,
           address,
           phone,
           email,
           totalPrice,
+          date: new Date().toISOString(),
         }),
       });
 
-      console.log('HTTP Status from /api/order_products/place:', response.status);
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Phản hồi lỗi từ /api/order_products/place:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const contentType = response.headers.get('content-type');
       const text = await response.text();
-      console.log('Raw response from /api/order_products/place:', text);
       if (!contentType || !contentType.includes('application/json')) {
-        console.error('Phản hồi từ /api/order_products/place không phải JSON:', contentType);
         throw new Error('Phản hồi không phải JSON');
       }
 
@@ -352,12 +337,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         data = JSON.parse(text);
       } catch {
-        console.error('Không thể parse JSON từ /api/order_products/place:', text);
         throw new Error('Response is not valid JSON');
       }
 
       setCartItems([]);
-      localStorage.removeItem('cartItems');
+      localStorage.removeItem(`cartItems_${user.email}`);
 
       return { orderCode: data.order.order_code };
     } catch (error) {
@@ -366,12 +350,100 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
+  const getOrderHistory = useCallback(async (): Promise<Order[]> => {
+    if (!user || !user.email) {
+      return [];
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/order_products/history', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      const text = await response.text();
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Phản hồi không phải JSON');
+      }
+
+      let data: { orders: Array<{
+        order_code: string;
+        total: number;
+        status: number;
+        created_at: string;
+        updated_at: string;
+        user: { id: string; name: string; address: string; phone: string };
+        products: Array<{
+          productId: string;
+          title: string;
+          brand: string;
+          image: string;
+          price: number;
+          quantity: number;
+        }>;
+      }> };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error('Response is not valid JSON');
+      }
+
+      // Gộp các đơn hàng có cùng order_code
+      const orderMap = new Map<string, Order>();
+      data.orders.forEach((order) => {
+        const existingOrder = orderMap.get(order.order_code);
+        if (existingOrder) {
+          // Gộp sản phẩm vào đơn hàng hiện có
+          existingOrder.items.push(...order.products.map((product) => ({
+            productId: product.productId,
+            title: product.title,
+            price: product.price,
+            quantity: product.quantity,
+            image: product.image,
+            brand: product.brand,
+          })));
+          existingOrder.totalPrice += order.total;
+        } else {
+          // Tạo đơn hàng mới
+          orderMap.set(order.order_code, {
+            orderCode: order.order_code,
+            date: order.created_at,
+            totalPrice: order.total,
+            items: order.products.map((product) => ({
+              productId: product.productId,
+              title: product.title,
+              price: product.price,
+              quantity: product.quantity,
+              image: product.image,
+              brand: product.brand,
+            })),
+            address: order.user.address,
+            phone: order.user.phone,
+            email: order.user.id,
+          });
+        }
+      });
+
+      return Array.from(orderMap.values());
+    } catch (error) {
+      console.error('Lỗi khi lấy lịch sử đơn hàng:', error);
+      return [];
+    }
+  }, [user]);
+
   useEffect(() => {
     syncCart();
   }, [user, syncCart]);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeItem, syncCart, clearCart, placeOrder }}>
+    <CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeItem, syncCart, clearCart, placeOrder, getOrderHistory }}>
       {children}
     </CartContext.Provider>
   );

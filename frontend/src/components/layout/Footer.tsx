@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Thành viên Paddiers</h2>
-          <p className="text-gray-700 mb-6 w-[660px] mx-auto">
+          <p className="dark:text-white mb-6 w-[660px] mx-auto">
             Đăng ký thành viên ngay hôm nay để nhận email về sản phẩm mới và
             chương trình khuyến mãi của Paddy
           </p>
@@ -34,7 +34,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/collections/thuc-an-cho-cho"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Dành Cho Chó
                 </Link>
@@ -42,7 +42,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/collections/mua-sam-cho-meo"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Dành Cho Mèo
                 </Link>
@@ -50,7 +50,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/brands-thuong-hieu-thu-cung"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Thương Hiệu
                 </Link>
@@ -58,7 +58,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/blogs/cham-soc-thu-cung"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Blogs
                 </Link>
@@ -66,7 +66,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/brands-thuong-hieu-thu-cung"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Bộ Sưu Tập
                 </Link>
@@ -80,7 +80,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/paddy-pet-shop"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Giới Thiệu
                 </Link>
@@ -88,7 +88,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/uu-dai-tich-luy-thanh-vien-paddier"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Thành Viên Paddier
                 </Link>
@@ -96,7 +96,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/policies/terms-of-service"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Điều Khoản Sử Dụng
                 </Link>
@@ -104,7 +104,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/tuyen-dung"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Tuyển Dụng
                 </Link>
@@ -118,7 +118,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/chinh-sach-doi-tra-hang"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Chính Sách Đổi Trả Hàng
                 </Link>
@@ -126,7 +126,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/policies/shipping-policy"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Phương Thức Vận Chuyển
                 </Link>
@@ -134,7 +134,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/policies/privacy-policy"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Chính Sách Bảo Mật
                 </Link>
@@ -142,7 +142,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/pages/huong-dan-thanh-toan"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Phương Thức Thanh Toán
                 </Link>
@@ -150,7 +150,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/policies/refund-policy"
-                  className="text-gray-700 hover:text-blue-600"
+                  className="dark:text-white hover:text-blue-600"
                 >
                   Chính Sách Hoàn Tiền
                 </Link>
@@ -160,7 +160,7 @@ const Footer = () => {
 
           <div className="mr-10">
             <h3 className="text-lg font-bold mb-4">Liên Hệ</h3>
-            <div className="text-gray-700">
+            <div className="dark:text-white">
               <p>
                 CÔNG TY CỔ PHẦN THƯƠNG MẠI & DỊCH VỤ PADDY
                 <br />
@@ -185,7 +185,7 @@ const Footer = () => {
             <div className="mt-6 flex space-x-2 ">
               <Link
                 href="https://www.facebook.com/PaddyPetShop"
-                className="text-gray-700 hover:text-blue-600 border border-transparent rounded-full p-2 hover:border-blue-600 transition-all duration-300"
+                className="dark:text-white hover:text-blue-600 border border-transparent rounded-full p-2 hover:border-blue-600 transition-all duration-300"
               >
                 <svg
                   className="w-8 h-8"
@@ -198,7 +198,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="https://www.instagram.com/paddypetshop/"
-                className="text-gray-700 hover:text-blue-600 border border-transparent rounded-full p-2 hover:border-blue-600 transition-all duration-300"
+                className="dark:text-white hover:text-blue-600 border border-transparent rounded-full p-2 hover:border-blue-600 transition-all duration-300"
               >
                 <svg
                   className="w-8 h-8"
@@ -211,7 +211,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="https://www.tiktok.com/@paddypetshop"
-                className="text-gray-700 hover:text-blue-600 border border-transparent rounded-full p-2 hover:border-blue-600 transition-all duration-300"
+                className="dark:text-white hover:text-blue-600 border border-transparent rounded-full p-2 hover:border-blue-600 transition-all duration-300"
               >
                 <svg
                   className="w-8 h-8"

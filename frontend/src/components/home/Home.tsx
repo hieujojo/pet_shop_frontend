@@ -15,7 +15,7 @@ const Home = () => {
     <>
       <div className="bg-[#ffd700] h-[65px]">
         <div>
-          <div className="flex justify-center text-sm items-center">
+          <div className="flex justify-center text-sm items-center dark:text-black">
             <div className="mt-2">Giảm đến</div>
             <div className="font-bold underline ml-1 mt-2"> 50% OFF</div>
             <div className="ml-1 mt-2">cho thành viên Paddiers*.</div>
@@ -125,7 +125,7 @@ const Home = () => {
         <div className="mt-7 text-[15px]">
           <Link
             href="/cat=protucts"
-            className="text-gray-700 cursor-pointer underline-offset-2 underline mr-20"
+            className="text-[#234BBB] cursor-pointer underline-offset-2 underline mr-20"
           >
             Xem Tất Cả
           </Link>
@@ -140,7 +140,7 @@ const Home = () => {
         <div className="mt-7 text-[15px]">
           <Link
             href="/cat=protucts"
-            className="text-gray-700 cursor-pointer underline-offset-2 underline mr-20"
+            className="text-[#234BBB] cursor-pointer underline-offset-2 underline mr-20"
           >
             Xem Tất Cả
           </Link>
@@ -172,7 +172,7 @@ const Home = () => {
         <div className="mt-7 text-[15px]">
           <Link
             href="/cat=protucts"
-            className="text-[#3C3C3C] cursor-pointer underline-offset-2 underline mr-20"
+            className="text-[#234BBB] cursor-pointer underline-offset-2 underline mr-20"
           >
             Xem Tất Cả
           </Link>

@@ -18,6 +18,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'example.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   eslint: {
@@ -41,8 +47,8 @@ const nextConfig = {
         destination: 'http://localhost:5000/api/products',
       },
       {
-        source: '/chatbot', // Thêm rule cho /chatbot
-        destination: 'http://localhost:5000/chatbot', // Chuyển tiếp tới backend
+        source: '/chatbot',
+        destination: 'http://localhost:5000/chatbot',
       },
     ];
   },

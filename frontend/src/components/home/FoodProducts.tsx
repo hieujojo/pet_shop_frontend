@@ -182,7 +182,7 @@ const FoodProducts = () => {
               <div className='flex mt-2'>
                 <p
                   className={`font-bold ${
-                    hasDiscount ? 'line-through text-black' : 'text-red-500'
+                    hasDiscount ? 'line-through dark:text-white' : 'text-red-500'
                   }`}
                 >
                   {product.originalPrice || '0'}

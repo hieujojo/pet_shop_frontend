@@ -59,11 +59,11 @@ const BrandBoss = () => {
         return (
           <div
             key={product.id}
-            className="relative flex flex-col items-center justify-center"
+            className="relative  flex flex-col items-center justify-center"
           >
             <Link href={safeHref} className="w-full" passHref legacyBehavior>
               <a>
-                <div className="relative shadow-lg overflow-hidden h-[160px] flex flex-col items-center justify-center rounded-lg box-shadow hover:shadow-xl transition-shadow duration-300">
+                <div className="relative shadow-lg overflow-hidden h-[160px] dark:bg-white flex flex-col items-center justify-center rounded-lg box-shadow hover:shadow-xl transition-shadow duration-300">
                   <div className="relative w-[160px] h-[100px]">
                     <Image
                       src={product.image || '/images/default-brand.png'}
@@ -76,7 +76,7 @@ const BrandBoss = () => {
                       }}
                     />
                   </div>
-                  <h3 className="mt-2 text-center hover:text-[#234BBB] hover:underline hover:underline-offset-4 hover:decoration-2 transition-all duration-300">
+                  <h3 className="mt-2 text-center hover:text-[#234BBB] dark:text-black  hover:underline hover:underline-offset-4 hover:decoration-2 transition-all duration-300">
                     {product.brand}
                   </h3>
                 </div>
